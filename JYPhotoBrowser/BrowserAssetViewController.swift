@@ -191,6 +191,8 @@ open class BrowserAssetViewController: UIViewController,
     /// - Tag: PopulateCell
     open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
+        debugPrint(#function)
+        
         progressView.isHidden = false
         let options = PHImageRequestOptions()
         options.deliveryMode = .highQualityFormat
@@ -237,6 +239,10 @@ open class BrowserAssetViewController: UIViewController,
                 }
             }
             
+            if isFirstDisplayCell {
+                playVideo(cell: cell, forItemAt: asset)
+            }
+            
             return cell
             
         default:
@@ -280,6 +286,42 @@ open class BrowserAssetViewController: UIViewController,
         }
     }
     
+    func playVideo(cell: UICollectionViewCell, forItemAt asset: PHAsset) {
+        let options = PHVideoRequestOptions()
+        options.isNetworkAccessAllowed = true
+        options.deliveryMode = .automatic
+        options.progressHandler = { progress, _, _, _ in
+            // The handler may originate on a background queue, so
+            // re-dispatch to the main queue for UI work.
+            DispatchQueue.main.sync {
+                self.progressView.progress = Float(progress)
+            }
+        }
+        
+        // Request an AVPlayerItem for the displayed PHAsset.
+        // Then configure a layer for playing it.
+        imageManager.requestPlayerItem(forVideo: asset, options: options, resultHandler: { playerItem, info in
+            DispatchQueue.main.async {
+                guard self.playerLayer == nil else { return }
+                
+                // Create an AVPlayer and AVPlayerLayer with the AVPlayerItem.
+                let player = AVPlayer(playerItem: playerItem)
+                let playerLayer = AVPlayerLayer(player: player)
+                
+                // Configure the AVPlayerLayer and add it to the view.
+                playerLayer.videoGravity = AVLayerVideoGravity.resizeAspect
+                playerLayer.frame = self.view.layer.bounds
+                
+//                self.view.layer.addSublayer(playerLayer)
+                
+                player.play()
+                cell.layer.addSublayer(playerLayer)
+                // Cache the player layer by reference, so you can remove it later.
+                self.playerLayer = playerLayer
+            } // DispatchQueue.main.sync
+        })// PHImageManager.default()
+    }
+    
     func playAsset(forItemAt indexPath: IndexPath) {
         
         stopAsset(forItemAt: indexPath)
@@ -292,39 +334,7 @@ open class BrowserAssetViewController: UIViewController,
             guard let cell = collectionView.cellForItem(at: IndexPath.init(row: currentIndex, section: 0)) as? BrowserVideoCollectionViewCell else {
                 return
             }
-            let options = PHVideoRequestOptions()
-            options.isNetworkAccessAllowed = true
-            options.deliveryMode = .automatic
-            options.progressHandler = { progress, _, _, _ in
-                // The handler may originate on a background queue, so
-                // re-dispatch to the main queue for UI work.
-                DispatchQueue.main.sync {
-                    self.progressView.progress = Float(progress)
-                }
-            }
-            
-            // Request an AVPlayerItem for the displayed PHAsset.
-            // Then configure a layer for playing it.
-            imageManager.requestPlayerItem(forVideo: asset, options: options, resultHandler: { playerItem, info in
-                DispatchQueue.main.async {
-                    guard self.playerLayer == nil else { return }
-                    
-                    // Create an AVPlayer and AVPlayerLayer with the AVPlayerItem.
-                    let player = AVPlayer(playerItem: playerItem)
-                    let playerLayer = AVPlayerLayer(player: player)
-                    
-                    // Configure the AVPlayerLayer and add it to the view.
-                    playerLayer.videoGravity = AVLayerVideoGravity.resizeAspect
-                    playerLayer.frame = self.view.layer.bounds
-                    self.view.layer.addSublayer(playerLayer)
-                    
-                    player.play()
-                    
-                    cell.layer.addSublayer(playerLayer)
-                    // Cache the player layer by reference, so you can remove it later.
-                    self.playerLayer = playerLayer
-                } // DispatchQueue.main.sync
-            })// PHImageManager.default()
+            playVideo(cell: cell, forItemAt: asset)
         default:
             break
         }
