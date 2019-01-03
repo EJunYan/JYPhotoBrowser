@@ -13,6 +13,7 @@ import PhotosUI
 open class BrowserAssetViewController: UIViewController,
     UICollectionViewDelegate,UICollectionViewDataSource
 {
+    
     private let kItemMargin:CGFloat = 20.0
     
     private var isFirstDisplayCell = true
@@ -105,6 +106,8 @@ open class BrowserAssetViewController: UIViewController,
     override open func viewDidLoad() {
         super.viewDidLoad()
         
+        self.isFirstDisplayCell = true
+        
         collectionViewInit()
         
         let y = self.navigationController?.navigationBar.bounds.height ?? 1.0 - 1.0
@@ -162,7 +165,8 @@ open class BrowserAssetViewController: UIViewController,
             self.automaticallyAdjustsScrollViewInsets = false
         }
         
-        collectionView.contentOffset = CGPoint(x: (kItemMargin + safeAreaSize.width) * CGFloat(currentIndex), y: 0)
+        collectionView.scrollToItem(at: IndexPath(item: currentIndex, section: 0), at: UICollectionView.ScrollPosition.right, animated: false)
+//        collectionView.contentOffset = CGPoint(x: (kItemMargin + safeAreaSize.width) * CGFloat(currentIndex), y: 0)
         
     }
     
@@ -173,7 +177,9 @@ open class BrowserAssetViewController: UIViewController,
     
     override open func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        
         navigationController?.hidesBarsOnTap = false
+        
     }
     
    
@@ -198,13 +204,20 @@ open class BrowserAssetViewController: UIViewController,
         }
         
         let asset = fetchResult.object(at: indexPath.item)
-
+        let targetSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
+        
+        // TODO: 计算合适的 targetSize 大小
+        debugPrint("pixelSize",asset.mediaType ,targetSize)
         
         switch asset.mediaType {
         case .image:
+            
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "BrowserImageCollectionViewCell", for: indexPath) as? BrowserImageCollectionViewCell else { fatalError("Unexpected cell in collection view") }
             
             cell.representedAssetIdentifier = asset.localIdentifier
+            
+            
+            
             imageManager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFit, options: options) { (image, _) in
                 self.progressView.isHidden = true
                 if cell.representedAssetIdentifier == asset.localIdentifier {
@@ -323,7 +336,7 @@ open class BrowserAssetViewController: UIViewController,
 
     
     // MARK: UIScrollView
-    
+    // 这部分 和上面的 查询当前Cell
 //    open func scrollViewDidScroll(_ scrollView: UIScrollView) {
 //        updateCachedAssets()
 //        // 滑动暂停一切播放

@@ -16,7 +16,9 @@ class BrowserImageCollectionViewCell: UICollectionViewCell {
         let scrollView = UIScrollView()
         scrollView.frame = self.bounds
         scrollView.isScrollEnabled = true
+        scrollView.scrollsToTop = false
         scrollView.maximumZoomScale = UIScreen.main.scale
+        scrollView.minimumZoomScale = 1.0
         return scrollView
     }()
     
