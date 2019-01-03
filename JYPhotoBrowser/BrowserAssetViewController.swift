@@ -210,13 +210,12 @@ open class BrowserAssetViewController: UIViewController,
         debugPrint("pixelSize",asset.mediaType ,targetSize)
         
         switch asset.mediaType {
+            
         case .image:
             
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "BrowserImageCollectionViewCell", for: indexPath) as? BrowserImageCollectionViewCell else { fatalError("Unexpected cell in collection view") }
             
             cell.representedAssetIdentifier = asset.localIdentifier
-            
-            
             
             imageManager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFit, options: options) { (image, _) in
                 self.progressView.isHidden = true
@@ -258,7 +257,6 @@ open class BrowserAssetViewController: UIViewController,
             stopAsset(forItemAt: indexPath)
             willDisplayCellIndexPath = indexPath
         }
-        
     }
     
     
