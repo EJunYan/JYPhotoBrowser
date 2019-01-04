@@ -251,8 +251,6 @@ open class BrowserAssetViewController: UIViewController,
         
     }
     
-
-    
     public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         debugPrint(#function, indexPath)
         if isFirstDisplayCell {
@@ -264,8 +262,6 @@ open class BrowserAssetViewController: UIViewController,
             willDisplayCellIndexPath = indexPath
         }
     }
-    
-    
     
     public func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         debugPrint(#function, indexPath)
@@ -331,7 +327,7 @@ open class BrowserAssetViewController: UIViewController,
         let asset = self.fetchResult.object(at: indexPath.item)
         switch asset.mediaType {
         case .video:
-            guard let cell = collectionView.cellForItem(at: IndexPath.init(row: currentIndex, section: 0)) as? BrowserVideoCollectionViewCell else {
+            guard let cell = collectionView.cellForItem(at: IndexPath.init(row: currentIndex, section: 0)) as? BrowserVideoCollectionViewCell,cell.representedAssetIdentifier == asset.localIdentifier else {
                 return
             }
             playVideo(cell: cell, forItemAt: asset)
@@ -344,10 +340,10 @@ open class BrowserAssetViewController: UIViewController,
 
     
     // MARK: UIScrollView
-    // 这部分 和上面的 查询当前Cell
-//    open func scrollViewDidScroll(_ scrollView: UIScrollView) {
-//        updateCachedAssets()
-//        // 滑动暂停一切播放
+    
+    open func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        updateCachedAssets()
+        // 滑动暂停一切播放
 //        guard scrollView == self.collectionView else {
 //            return
 //        }
@@ -374,11 +370,11 @@ open class BrowserAssetViewController: UIViewController,
 //        default:
 //            assert(false)
 //        }
+
+    }
 //
-//    }
-//
-//    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-//
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+
 //        guard scrollView == self.collectionView else {
 //            return
 //        }
@@ -400,7 +396,7 @@ open class BrowserAssetViewController: UIViewController,
 //        default:
 //            assert(false)
 //        }
-//    }
+    }
     
     
     
