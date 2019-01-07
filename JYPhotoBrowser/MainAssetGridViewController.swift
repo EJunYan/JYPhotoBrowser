@@ -57,7 +57,16 @@ UICollectionViewDelegate,UICollectionViewDataSource
         
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
-        self.collectionView = UICollectionView(frame: self.view.bounds, collectionViewLayout: collectionViewFlowLayout)
+        var bounds: CGRect!
+        
+        if #available(iOS 11.0, *) {
+            bounds = view.bounds.inset(by: view.safeAreaInsets)
+        } else {
+            // Fallback on earlier versions
+            bounds = view.bounds
+        }
+        
+        self.collectionView = UICollectionView(frame: bounds, collectionViewLayout: collectionViewFlowLayout)
         self.collectionView.backgroundColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
         self.collectionView.register(GridViewCell.self, forCellWithReuseIdentifier: "GridViewCell")
         collectionView.delegate = self
