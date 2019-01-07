@@ -33,10 +33,12 @@ UICollectionViewDelegate,UICollectionViewDataSource
     
     open var fetchResult: PHFetchResult<PHAsset>!
     open var assetCollection: PHAssetCollection!
-    open var availableWidth: CGFloat = 0
     
-    lazy var collectionViewFlowLayout: UICollectionViewFlowLayout = {
+    fileprivate var availableWidth: CGFloat = 0
+    
+    fileprivate lazy var collectionViewFlowLayout: UICollectionViewFlowLayout = {
        let layout = UICollectionViewFlowLayout()
+        layout.itemSize = CGSize(width: 80.0, height: 80.0)
         layout.minimumInteritemSpacing = 1.0
         layout.minimumLineSpacing = 1.0
         return layout
@@ -51,18 +53,16 @@ UICollectionViewDelegate,UICollectionViewDataSource
     override open func viewDidLoad() {
         super.viewDidLoad()
         
-        if collectionView == nil {
-            // CollectionView Init
-            
-            // Uncomment the following line to preserve selection between presentations
-            // self.clearsSelectionOnViewWillAppear = false
-            self.collectionView = UICollectionView(frame: self.view.bounds, collectionViewLayout: collectionViewFlowLayout)
-            self.collectionView.backgroundColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
-            self.collectionView.register(GridViewCell.self, forCellWithReuseIdentifier: "GridViewCell")
-            collectionView.delegate = self
-            collectionView.dataSource = self
-            self.view.addSubview(self.collectionView)
-        }
+        // CollectionView Init
+        
+        // Uncomment the following line to preserve selection between presentations
+        // self.clearsSelectionOnViewWillAppear = false
+        self.collectionView = UICollectionView(frame: self.view.bounds, collectionViewLayout: collectionViewFlowLayout)
+        self.collectionView.backgroundColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        self.collectionView.register(GridViewCell.self, forCellWithReuseIdentifier: "GridViewCell")
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        self.view.addSubview(self.collectionView)
 
         resetCachedAssets()
         PHPhotoLibrary.shared().register(self)
@@ -91,15 +91,14 @@ UICollectionViewDelegate,UICollectionViewDataSource
             // Fallback on earlier versions
             width = view.bounds.width
         }
-        
         // Adjust the item size if the available width has changed.
         if availableWidth != width {
             availableWidth = width
             
-            // TODO: 每一个机器 需要设置size大小
-            let columnCount = (availableWidth / 80).rounded(.towardZero)
+            let columnCount = (availableWidth / 80.0).rounded(.towardZero)
             let itemLength = (availableWidth - columnCount - 1) / columnCount
             collectionViewFlowLayout.itemSize = CGSize(width: itemLength, height: itemLength)
+//            self.collectionView.reloadData()
             self.collectionView.setCollectionViewLayout(collectionViewFlowLayout, animated: false)
         }
     }
@@ -108,7 +107,7 @@ UICollectionViewDelegate,UICollectionViewDataSource
         super.viewWillAppear(animated)
         
         // Determine the size of the thumbnails to request from the PHCachingImageManager.
-        let scale = UIScreen.main.scale
+        let scale:CGFloat = UIScreen.main.scale
         let cellSize = collectionViewFlowLayout.itemSize
         thumbnailSize = CGSize(width: cellSize.width * scale, height: cellSize.height * scale)
         
